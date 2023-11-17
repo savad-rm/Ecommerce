@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-word</title>
+    <link rel="stylesheet" href="../../assets/css/dashbord/style.css">
+    <link rel="stylesheet" href="../../assets/css/dashbord/responsive.css">
+    <link rel="stylesheet" href="../../assets/css/boostrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../../assets/css/boostrap/css/all.min.css">
+    <link rel="stylesheet" href="../../assets/css/boostrap/css/jquery.bootstrap-touchspin.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+
+</head>
+<body>
+    <header class="header">
+        <div class="container-fluid--cp-150">
+            <div class="row align-items-center">
+                <div class="col-md-4 col-6">
+                     <img src="../../assets/css/dashbord/images /logo/logo.jpg" class="logo">
+                </div>
+                <div class="col-8 col-md-8 col-6">
+                    <ul class="menu ">
+                        <li><a href="/home">Home</a></li>
+                        <li><a href="#">About</a></li>
+                        <li><a href="#">Product</a></li>
+                        <li><a href="#">Career </a></li>
+                        <li><a href="#">Contact</a></li>
+                    
+                    </ul>
+                </div>
+            </div>
+        </div>  
+    </header>
+    <section class="home">
+            <div class="container-fluid">
+                <div class="row feat-caro">
+                    <div class="col-lg-12 col-md-12 col-sm-12">
+                        <img src="../../assets/css/public/images/1.jpg" class="img-fluid home-bg">
+                    </div>
+                </div>
+            </div>
+    </section>
+    <section>
+        <div class="container-fluid--cp-150">
+            <div class="row justify-content-center">
+               <div class="col-12">
+               <h2 class="align-items-center text-center product-h"> Our product </h2>
+               </div>
+                <div class="col-md-6 col-lg-6 col-sm-12">
+                    <div class="prd-img ">
+                      <img src="../../assets/css/public/images/1.jpg" class="img-fluid h-auto">
+                      <div class="prd-content position-relative w-100">
+                        <h3 class="mb-0"><a href="#" title="">Modern natural materials</a></h3>
+                        <span class="thm-clr d-block">Architecture </span>
+                        <span class="thm-clr d-block">product details</span>
+                        <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Distinctio pariatur dolorum sed quidem ad illo laborum error praesentium corporis neque.</p>
+                        <!-- <a class="position-absolute thm-clr" href="portfolio.html" title=""><i class="icon-share-alt"></i></a> -->
+                    </div>
+                  </div>
+                </div>
+                </div>
+                <div class="col-12 text-center">
+                    <h3 class="mb-5 title-header">
+                        Related products
+                    </h3>
+                </div>
+                <div class="row justify-content-center">
+                <div class="col-md-4 col-lg-3 col-sm-12">
+                    <div class="prd-img">
+                      <img src="../../assets/css/public/images/2.jpg" class="img-fluid">
+                      <div class="prd-content position-relative w-100">
+                        <h3 class="mb-0"><a href="#" title="">Modern natural materials</a></h3>
+                        <span class="thm-clr d-block">Architecture</span>
+                        <!-- <a class="position-absolute thm-clr" href="portfolio.html" title=""><i class="icon-share-alt"></i></a> -->
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-4 col-lg-3 col-sm-12">
+                    <div class="prd-img">
+                      <img src="../../assets/css/public/images/3.jpg" class="img-fluid">
+                      <div class="prd-content position-relative w-100">
+                        <h3 class="mb-0"><a href="#" title="">Modern natural materials</a></h3>
+                        <span class="thm-clr d-block">Architecture</span>
+                        <!-- <a class="position-absolute thm-clr" href="portfolio.html" title=""><i class="icon-share-alt"></i></a> -->
+                    </div>
+                  </div>
+                </div>
+                <div class="clearfix"></div>
+                    <div id="myModal" class="modal">
+                          <span class="close">×</span>
+                             <img class="modal-content" id="img01">
+                          <div id="caption"></div>
+                   </div>
+            </div>
+        </div>
+    </section>
+
+    
+<script src="../../assets/css/boostrap/js/bootstrap.min.js"></script>
+<script type="module" src="../../assets/css/boostrap/js/jquery.bootstrap-touchspin.min.js"></script>
+<script>
+
+var modal = document.getElementById('myModal');
+
+var span = document.getElementsByClassName("close")[0];
+
+span.onclick = function() { 
+    modal.style.display = "none";
+}
+
+var images = document.getElementsByTagName('img');
+var modalImg = document.getElementById("img01");
+var captionText = document.getElementById("caption");
+var i;
+for (i = 0; i < images.length; i++) {
+   images[i].onclick = function(){
+       modal.style.display = "block";
+       modalImg.src = this.src;
+       modalImg.alt = this.alt;
+       captionText.innerHTML = this.nextElementSibling.innerHTML;
+   }
+}
+</script>
+<script src="/assets/css/slider-custome.js"></script>
+</body>
+</html>
