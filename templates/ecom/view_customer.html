@@ -40,7 +40,12 @@
       {% for c in customers %}
       <tr>
         <td> {{c.get_name}}</td>
-        <td> <img src="{% static c.profile_pic.url %}" alt="Profile Pic" height="40px" width="40px" /></td>
+        <td>{% if customer.profile_pic %}
+          <img src="{% static c.profile_pic.url %}" alt="Profile Pic" height="40px" width="40px" />
+      {% else %}
+          <p>No profile picture available</p>
+      {% endif %} 
+          </td>
         <td>{{c.mobile}}</td>
         <td>{{c.address}}</td>
         <td><a class="btn btn-primary btn-xs" href="{% url 'update-customer' c.id  %}"><span class="glyphicon glyphicon-edit"></span></a>
