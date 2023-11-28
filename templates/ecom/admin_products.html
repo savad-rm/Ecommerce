@@ -61,7 +61,7 @@
 
       <tr>
         <td> {{p.name}}</td>
-        <td> {% if customer.product_image %}
+        <td> {% if p.product_image %}
           <img src="{% static p.product_image.url %}" alt="Product Pic" height="40px" width="40px" />
           {% else %}
           <p>No Picture available</p>

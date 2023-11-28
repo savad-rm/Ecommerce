@@ -40,7 +40,7 @@
       {% for c in customers %}
       <tr>
         <td> {{c.get_name}}</td>
-        <td>{% if customer.profile_pic %}
+        <td>{% if c.profile_pic %}
           <img src="{% static c.profile_pic.url %}" alt="Profile Pic" height="40px" width="40px" />
       {% else %}
           <p>No profile picture available</p>
