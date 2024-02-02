@@ -92,9 +92,17 @@ select{
 <form method="post">
   {% csrf_token %}
 <ul class="form-style-1">
-    <li>
+
+	<br><br><br><br><br>
+
+    <!-- <li>
         <label>Email <span class="required">*</span></label>
         {% render_field addressForm.Email class="field-long" placeholder="Email" %}
+
+    </li> -->
+	<li>
+        <label>Name <span class="required">*</span></label>
+        {% render_field addressForm.Name class="field-long" placeholder="Name" %}
 
     </li>
     <li>
@@ -102,15 +110,19 @@ select{
         {% render_field addressForm.Mobile class="field-long" placeholder="Mobile" %}
     </li>
 
-    <li>
+    <!-- <li>
         <label>Shipment Address <span class="required">*</span></label>
         {% render_field addressForm.Address id="field5" class="field-long field-textarea" placeholder="Building Number,city, pin" %}
 
-    </li>
+    </li> -->
     <li>
         <input type="submit" value="Proceed To Pay" />
     </li>
 </ul>
+<div>
+	<br><br><br><br>
+</div>
+
 </form>
 {%else%}
 <br><br>

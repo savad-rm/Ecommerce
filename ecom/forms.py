@@ -3,18 +3,28 @@ from django.contrib.auth.models import User
 from . import models
 
 
-class CustomerUserForm(forms.ModelForm):
-    class Meta:
-        model=User
-        fields=['first_name','last_name','username','password']
-        widgets = {
-        'password': forms.PasswordInput()
-        }
+# class CustomerUserForm(forms.ModelForm):
+#     class Meta:
+#         model=User
+#         fields=['first_name','last_name','username','password']
+#         widgets = {
+#         'password': forms.PasswordInput()
+#         }
         
-class CustomerForm(forms.ModelForm):
-    class Meta:
-        model=models.Customer
-        fields=['address','mobile','profile_pic']
+# class CustomerUserForm(forms.ModelForm):
+#     class Meta:
+#         model=User
+#         fields=['username','mobile']
+
+# class CustomerForm(forms.ModelForm):
+#     class Meta:
+#         model=models.Customer
+#         fields=['mobile']        
+                
+# class CustomerForm(forms.ModelForm):
+#     class Meta:
+#         model=models.Customer
+#         fields=['address','mobile','profile_pic']
 
 class ProductForm(forms.ModelForm):
     class Meta:
@@ -23,9 +33,10 @@ class ProductForm(forms.ModelForm):
 
 #address of shipment
 class AddressForm(forms.Form):
-    Email = forms.EmailField()
-    Mobile= forms.IntegerField()
-    Address = forms.CharField(max_length=500)
+    # Email = forms.EmailField()
+    Name = forms.CharField()
+    Mobile= forms.CharField()
+    # Address = forms.CharField(max_length=500)
 
 class FeedbackForm(forms.ModelForm):
     class Meta:
@@ -33,10 +44,10 @@ class FeedbackForm(forms.ModelForm):
         fields=['name','feedback']
 
 #for updating status of order
-class OrderForm(forms.ModelForm):
-    class Meta:
-        model=models.Orders
-        fields=['status']
+# class OrderForm(forms.ModelForm):
+#     class Meta:
+#         model=models.Orders
+#         fields=['status']
 
 #for contact us page
 class ContactusForm(forms.Form):

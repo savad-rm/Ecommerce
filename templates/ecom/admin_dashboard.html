@@ -15,23 +15,24 @@
       <table class="table table-hover table-bordered" id="dev-table">
         <thead>
           <tr>
-            <th>Customer</th>
+            <!-- <th>Customer</th>
             <th>Contact</th>
-            <th>Shipment Address</th>
+            <th>Shipment Address</th> -->
             <th>Product</th>
             <th>Image</th>
             <th>Status</th>
 
           </tr>
         </thead>
-        {% for product,customer,order in data %}
+        {% for product,order in data %}
+        <!-- customer, -->
         <tr>
-          {% for c in customer %}
+          <!-- {% for c in customer %}
           <td> {{c.get_name}}</td>
           <td>{{c.mobile}}</td>
           <td>{{order.address}}</td>
 
-          {% endfor %}
+          {% endfor %} -->
           {% for p in product %}
           <td> {{p.name}}</td>
           <td> <img src="{% static p.product_image.url %}" alt="Profile Pic" height="40px" width="40px" /></td>
