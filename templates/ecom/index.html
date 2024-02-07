@@ -411,7 +411,7 @@
 <h3 style="text-align:center; color:#3E454C;">{{word}}</h3>
 <br>
 
-<!-- products data starttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt -->
+<!-- products data start -->
 <div class="row">
 
   {% for p in products %}
@@ -464,21 +464,27 @@
 <h3 style="text-align:center; color:#3E454C;">No Search Found</h3>
 {%endif%}
 
-<script>
-// <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet"/>
-  
 
-    {% if notification_message %}
-    toastr.{{ notification_type }}("{{ notification_message }}", {% if extra_options %}{{ extra_options|safe }}{% else %}{timeOut: 3000}{% endif %});
-    {% endif %}
 
-  // {% if messages %}
-  // {%for message in messages %}
-  // alert('{{message}}');
-  // {% endfor %}
-  // {% endif %}
-  
-// <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js">
+<!-- <script> -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+
+{% if notification_message %}
+    <script>
+        // Display Toastr message
+        toastr.{{ notification_type }}("{{ notification_message }}", {
+            {% if extra_options %}
+                {% for key, value in extra_options.items %}
+                    "{{ key }}": {{ value|default_if_none:"true" }},
+                {% endfor %}
+            {% else %}
+                "timeOut": 3000
+            {% endif %}
+        });
+    </script>
+{% endif %}
 
 </script>
 <br><br><br>

@@ -6,9 +6,10 @@
 
 </head>
 <body>
-    <form action="https://www.example.com/payment/success/" method="POST">
+    <form id="payment-form" action="/payment-success" method="POST">
     <!-- <form action=success method="POST">     -->
         #Razorpay
+        {% csrf_token %}
 <script
     src="https://checkout.razorpay.com/v1/checkout.js"
     data-key="rzp_test_7kPo1SLPf8JLM2" // Enter the Test API Key ID generated from Dashboard → Settings → API Keys
@@ -22,8 +23,25 @@
     data-prefill.name=Customer"
     data-prefill.email="Customer@gmail.com"
     data-theme.color="#F37254"
+
+    data-handler="onPaymentSuccess"
+    
 ></script>
     </form>
+
+    <script>
+        function onPaymentSuccess(response) {
+            // You can perform additional actions here if needed
+            console.log(response);
+
+            // Redirect to the payment success page
+            // document.getElementById("payment-form").submit();
+
+            // Redirect to the payment success page
+            window.location.href = "/payment-success";
+        }
+    </script>
+
 </body>
 
 

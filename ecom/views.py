@@ -8,6 +8,9 @@ from django.contrib import messages
 from django.conf import settings
 import razorpay
 
+import requests
+
+
 from django.utils.crypto import get_random_string
 import json
 
@@ -215,39 +218,6 @@ def view_feedback_view(request):
 #------------------------ PUBLIC CUSTOMER RELATED VIEWS START ---------------------
 #---------------------------------------------------------------------------------
 # any one can add product to cart, no need of signin
-# def add_to_cart_view(request,pk):
-#     products=models.Product.objects.all()
-
-#     #for cart counter, fetching products ids added by customer from cookies
-#     if 'product_ids' in request.COOKIES:
-#         product_ids = request.COOKIES['product_ids']
-#         # counter=product_ids.split('|')
-#         counter=len(product_ids)
-#         # product_count_in_cart=len(set(counter))
-#         product_count_in_cart=counter
-#         # print(product_ids)
-#     else:
-#         product_count_in_cart=1
-
-#     response = render(request, 'ecom/index.html',{'products':products,'product_count_in_cart':product_count_in_cart})
-
-#     #adding product id to cookies
-#     if 'product_ids' in request.COOKIES:
-#         product_ids = request.COOKIES['product_ids']
-#         if product_ids=="":
-#             product_ids=str(pk)
-#         else:
-#             product_ids=product_ids+"|"+str(pk)
-#         response.set_cookie('product_ids', product_ids)
-#     else:
-#         response.set_cookie('product_ids', pk)
-
-#     product=models.Product.objects.get(id=pk)
-#     messages.info(request, product.name + ' added to cart successfully!')
-
-#     return response
-
-
 def add_to_cart_view(request, pk):
     products = models.Product.objects.all()
     cartproduct = models.Product.objects.get(id=pk)
@@ -275,25 +245,24 @@ def add_to_cart_view(request, pk):
         'extra_options': extra_options,
     })
 
-    # response = render(request, 'ecom/index.html', {'products': products,'product_count_in_cart': product_count_in_cart})
-    
-    # return response
-    # Save cart in cookies
-    # response.set_cookie('cart', json.dumps(cart))
-
 
 def cart_view(request):
     cart = request.session.get('cart', {})
     cart_items = list(cart.values())
     products=None
+    total_price=0
+    product_count_in_cart=0
     if cart_items:
-        products= models.Product.objects.filter(id__in=[item['id'] for item in cart_items])    
+        products= models.Product.objects.filter(id__in=[item['id'] for item in cart_items])  
     total_price = sum(float(item['price']) * item['quantity'] for item in cart_items)
     product_count_in_cart = len(cart_items)
     return render(request, 'ecom/cart.html', {'products': products, 'total': total_price,'product_count_in_cart': product_count_in_cart})
 
 def remove_from_cart_view(request, pk):
     product = models.Product.objects.get(id=pk)
+    products=None
+    total=0
+    product_count_in_cart=0
     if 'cart' not in request.session:
         request.session['cart'] = {}
     if str(product.id) in request.session['cart']:
@@ -301,9 +270,10 @@ def remove_from_cart_view(request, pk):
         request.session.modified = True
         cart=request.session['cart']
         cartproducts = list(cart.values())
-        products = models.Product.objects.filter(id__in=[item['id'] for item in cartproducts.values()])
-        total = sum(float(item['price']) * item['quantity'] for item in cartproducts.values())
-        product_count_in_cart = len(cartproducts)        
+        if cartproducts:
+            products = models.Product.objects.filter(id__in=[item['id'] for item in cartproducts.values()])
+            total = sum(float(item['price']) * item['quantity'] for item in cartproducts.values())
+            product_count_in_cart = len(cartproducts)        
         response = render(request, 'ecom/cart.html', {'products': products, 'total': total, 'product_count_in_cart': product_count_in_cart})
         return response
 
@@ -375,16 +345,14 @@ def customer_address_view(request):
             #     "key2": "value2"
             # }
             })            
-            response = render(request, 'ecom/payment.html',{'payment':payment})
+            response = render(request, 'ecom/payment.html',{'payment':payment,'product_count_in_cart':product_count_in_cart})
+            # response = redirect('payment-success')
             # response.set_cookie('email',email)
             response.set_cookie('name',name)
             response.set_cookie('mobile',mobile)
             # response.set_cookie('address',address)
             return response
     return render(request,'ecom/customer_address.html',{'addressForm':addressForm,'product_in_cart':product_in_cart,'product_count_in_cart':product_count_in_cart})
-
-
-
 
 # here we are just directing to this view...actually we have to check whther payment is successful or not
 #then only this view should be accessed
@@ -402,10 +370,36 @@ def payment_success_view(request):
     # address=None
     cart=request.session['cart']
     if cart:
+        product_count_in_cart = len(cart)
+    else:
+        product_count_in_cart=0
+    if cart:
         cartproducts = list(cart.values())
-        products = models.Product.objects.filter(id__in=[item['id'] for item in cartproducts.values()])
+        # products = models.Product.objects.filter(id__in=[item['id'] for item in cartproducts.values()])
+        product_ids = [item['id'] for item in cartproducts]  # List of product IDs
+        products = models.Product.objects.filter(id__in=product_ids)
             # Here we get products list that will be ordered by one customer at a time
 
+        for product in products:
+            models.Orders.objects.get_or_create(product=product,mobile=mobile,name=name)
+            # customer=customer,,address=address,email=email,,status='Pending'
+
+            # Sending product ID and quantity to API
+            api_url = 'http://127.0.0.1:8000/api/receive_order/'
+            payload = {
+                'product_id': product.id,
+                'quantity': cart[str(product.id)]['quantity'],
+            }
+            # headers = {'Authorization': 'Bearer ' + settings.API_ACCESS_TOKEN, 'Content-Type': 'application/json'}
+            # , headers=headers
+            response = requests.post(api_url, json=payload)
+
+            if response.status_code == 200:
+                # Order successfully sent to the API
+                print(f"Order for product ID {product.id} sent successfully.")
+            else:
+                # Handle API request failure
+                print(f"Failed to send order for product ID {product.id}. Error: {response.text}") 
     # these things can be change so accessing at the time of order...
     # if 'email' in request.COOKIES:
     #     email=request.COOKIES['email']
@@ -419,12 +413,8 @@ def payment_success_view(request):
     # here we are placing number of orders as much there is a products
     # suppose if we have 5 items in cart and we place order....so 5 rows will be created in orders table
     # there will be lot of redundant data in orders table...but its become more complicated if we normalize it
-    for product in products:
-        models.Orders.objects.get_or_create(product=product,mobile=mobile,name=name)
-        # customer=customer,,address=address,email=email,,status='Pending'
-
     # after order placed cookies should be deleted
-    response = render(request,'ecom/payment_success.html')
+    response = render(request,'ecom/payment_success.html',{'product_count_in_cart':product_count_in_cart})
     # response.delete_cookie('product_ids')
     del request.session['cart']
     # response.delete_cookie('email')
