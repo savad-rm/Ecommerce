@@ -271,9 +271,10 @@ def remove_from_cart_view(request, pk):
         cart=request.session['cart']
         cartproducts = list(cart.values())
         if cartproducts:
-            products = models.Product.objects.filter(id__in=[item['id'] for item in cartproducts.values()])
-            total = sum(float(item['price']) * item['quantity'] for item in cartproducts.values())
-            product_count_in_cart = len(cartproducts)        
+            product_ids = [item['id'] for item in cartproducts]  # Extract product IDs
+            products = models.Product.objects.filter(id__in=product_ids)
+            total = sum(float(item['price']) * item['quantity'] for item in cartproducts)
+            product_count_in_cart = len(cartproducts)      
         response = render(request, 'ecom/cart.html', {'products': products, 'total': total, 'product_count_in_cart': product_count_in_cart})
         return response
 
@@ -375,7 +376,6 @@ def payment_success_view(request):
         product_count_in_cart=0
     if cart:
         cartproducts = list(cart.values())
-        # products = models.Product.objects.filter(id__in=[item['id'] for item in cartproducts.values()])
         product_ids = [item['id'] for item in cartproducts]  # List of product IDs
         products = models.Product.objects.filter(id__in=product_ids)
             # Here we get products list that will be ordered by one customer at a time
