@@ -13,6 +13,11 @@ import requests
 
 from django.utils.crypto import get_random_string
 import json
+from django.http import JsonResponse, HttpResponseForbidden, HttpResponseNotAllowed
+import hmac
+import hashlib
+
+
 
 def home_view(request):
     products=models.Product.objects.all()
@@ -63,7 +68,6 @@ def afterlogin_view(request):
         return redirect('customer-home')
     else:
         return redirect('admin-dashboard')
-
 # @login_required(login_url='adminlogin')
 # def logout_view(request):
     
@@ -245,18 +249,37 @@ def add_to_cart_view(request, pk):
         'extra_options': extra_options,
     })
 
-
 def cart_view(request):
-    cart = request.session.get('cart', {})
-    cart_items = list(cart.values())
+    product_quantities=None
     products=None
     total_price=0
     product_count_in_cart=0
+    cart = request.session.get('cart', {})
+    product_quantities = {int(item_id): item_data['quantity'] for item_id, item_data in cart.items()}
+    cart_items = list(cart.values())
     if cart_items:
         products= models.Product.objects.filter(id__in=[item['id'] for item in cart_items])  
-    total_price = sum(float(item['price']) * item['quantity'] for item in cart_items)
-    product_count_in_cart = len(cart_items)
+        for product in products:
+                product.quantity = product_quantities[product.id]
+        total_price = sum(float(item['price']) * item['quantity'] for item in cart_items)
+        product_count_in_cart = len(cart_items)
     return render(request, 'ecom/cart.html', {'products': products, 'total': total_price,'product_count_in_cart': product_count_in_cart})
+
+def increment_quantity_view(request, pk):
+    cart = request.session.get('cart', {})
+    if str(pk) in cart:
+        cart[str(pk)]['quantity'] += 1
+        request.session.modified = True
+    return redirect('cart')
+
+def decrement_quantity_view(request, pk):
+    cart = request.session.get('cart', {})
+    if str(pk) in cart:
+        if cart[str(pk)]['quantity'] > 1:
+            cart[str(pk)]['quantity'] -= 1
+            request.session.modified = True
+    return redirect('cart')
+
 
 def remove_from_cart_view(request, pk):
     product = models.Product.objects.get(id=pk)
@@ -269,10 +292,13 @@ def remove_from_cart_view(request, pk):
         del request.session['cart'][str(product.id)]
         request.session.modified = True
         cart=request.session['cart']
+        product_quantities = {int(item_id): item_data['quantity'] for item_id, item_data in cart.items()}
         cartproducts = list(cart.values())
         if cartproducts:
             product_ids = [item['id'] for item in cartproducts]  # Extract product IDs
             products = models.Product.objects.filter(id__in=product_ids)
+            for product in products:
+                product.quantity = product_quantities[product.id]
             total = sum(float(item['price']) * item['quantity'] for item in cartproducts)
             product_count_in_cart = len(cartproducts)      
         response = render(request, 'ecom/cart.html', {'products': products, 'total': total, 'product_count_in_cart': product_count_in_cart})
@@ -355,73 +381,114 @@ def customer_address_view(request):
             return response
     return render(request,'ecom/customer_address.html',{'addressForm':addressForm,'product_in_cart':product_in_cart,'product_count_in_cart':product_count_in_cart})
 
+SECRET_KEY="s3ZK5qrR1Vyl9LPldjAm3Kru"
+payload=None
+signature=None
+
+def webhook_view(request):
+    global payload, signature
+    if request.method == 'POST':
+        payload = request.body
+        signature = request.headers.get('X-Razorpay-Signature')
+        
+        # Verify webhook signature
+        if not verify_webhook_signature(payload, signature):
+            return HttpResponseForbidden()
+
+        # Process webhook event
+        event = request.headers.get('X-Razorpay-Event')
+        if event == 'payment.captured':
+            # Handle payment success
+            # Update order status, send confirmation email, etc.
+            return JsonResponse({'status': 'success'})
+        elif event == 'payment.failed':
+            # Handle payment failure
+            # Update order status, notify user, etc.
+            return JsonResponse({'status': 'failed'})
+        else:
+            # Handle other webhook events
+            return JsonResponse({'status': 'other_event'})
+
+    return HttpResponseNotAllowed(['POST'])
+
+
+def verify_webhook_signature(payload, signature):
+    expected_signature = hmac.new(SECRET_KEY.encode(), payload, hashlib.sha256).hexdigest()
+    return hmac.compare_digest(signature, expected_signature)
+
+
+
 # here we are just directing to this view...actually we have to check whther payment is successful or not
 #then only this view should be accessed
 def payment_success_view(request):
-    # Here we will place order | after successful payment
-    # we will fetch customer  mobile, address, Email
-    # we will fetch product id from cookies then respective details from db
-    # then we will create order objects and store in db
-    # after that we will delete cookies because after order placed...cart should be empty
-    # customer=models.Customer.objects.get(user_id=request.user.id)
-    products=None
-    # email=None
-    name=None
-    mobile=None
-    # address=None
-    cart=request.session['cart']
-    if cart:
-        product_count_in_cart = len(cart)
+    global payload, signature
+    if verify_webhook_signature(payload, signature):    
+        # Here we will place order | after successful payment
+        # we will fetch customer  mobile, address, Email
+        # we will fetch product id from cookies then respective details from db
+        # then we will create order objects and store in db
+        # after that we will delete cookies because after order placed...cart should be empty
+        # customer=models.Customer.objects.get(user_id=request.user.id)
+        products=None
+        name=None
+        mobile=None
+        # email=None
+        # address=None
+        cart=request.session['cart']
+        if cart:
+            product_count_in_cart = len(cart)
+        else:
+            product_count_in_cart=0
+        if cart:
+            cartproducts = list(cart.values())
+            product_ids = [item['id'] for item in cartproducts]  # List of product IDs
+            products = models.Product.objects.filter(id__in=product_ids)
+                # Here we get products list that will be ordered by one customer at a time
+
+            for product in products:
+                models.Orders.objects.get_or_create(product=product,mobile=mobile,name=name)
+                # customer=customer,,address=address,email=email,,status='Pending'
+
+                # Sending product ID and quantity to API
+                api_url = 'http://127.0.0.1:8000/api/receive_order/'
+                payload = {
+                    'product_id': product.id,
+                    'quantity': cart[str(product.id)]['quantity'],
+                }
+                # headers = {'Authorization': 'Bearer ' + settings.API_ACCESS_TOKEN, 'Content-Type': 'application/json'}
+                # , headers=headers
+                response = requests.post(api_url, json=payload)
+
+                if response.status_code == 200:
+                    # Order successfully sent to the API
+                    print(f"Order for product ID {product.id} sent successfully.")
+                else:
+                    # Handle API request failure
+                    print(f"Failed to send order for product ID {product.id}. Error: {response.text}") 
+        # these things can be change so accessing at the time of order...
+        # if 'email' in request.COOKIES:
+        #     email=request.COOKIES['email']
+        if 'name' in request.COOKIES:
+            name=request.COOKIES['name']    
+        if 'mobile' in request.COOKIES:
+            mobile=request.COOKIES['mobile']
+        # if 'address' in request.COOKIES:
+        #     address=request.COOKIES['address']
+
+        # here we are placing number of orders as much there is a products
+        # suppose if we have 5 items in cart and we place order....so 5 rows will be created in orders table
+        # there will be lot of redundant data in orders table...but its become more complicated if we normalize it
+        # after order placed cookies should be deleted
+        response = render(request,'ecom/payment_success.html',{'product_count_in_cart':product_count_in_cart})
+        # response.delete_cookie('product_ids')
+        del request.session['cart']
+        # response.delete_cookie('email')
+        response.delete_cookie('name')
+        response.delete_cookie('mobile')
+        # response.delete_cookie('address')
+        return response
     else:
-        product_count_in_cart=0
-    if cart:
-        cartproducts = list(cart.values())
-        product_ids = [item['id'] for item in cartproducts]  # List of product IDs
-        products = models.Product.objects.filter(id__in=product_ids)
-            # Here we get products list that will be ordered by one customer at a time
-
-        for product in products:
-            models.Orders.objects.get_or_create(product=product,mobile=mobile,name=name)
-            # customer=customer,,address=address,email=email,,status='Pending'
-
-            # Sending product ID and quantity to API
-            api_url = 'http://127.0.0.1:8000/api/receive_order/'
-            payload = {
-                'product_id': product.id,
-                'quantity': cart[str(product.id)]['quantity'],
-            }
-            # headers = {'Authorization': 'Bearer ' + settings.API_ACCESS_TOKEN, 'Content-Type': 'application/json'}
-            # , headers=headers
-            response = requests.post(api_url, json=payload)
-
-            if response.status_code == 200:
-                # Order successfully sent to the API
-                print(f"Order for product ID {product.id} sent successfully.")
-            else:
-                # Handle API request failure
-                print(f"Failed to send order for product ID {product.id}. Error: {response.text}") 
-    # these things can be change so accessing at the time of order...
-    # if 'email' in request.COOKIES:
-    #     email=request.COOKIES['email']
-    if 'name' in request.COOKIES:
-        name=request.COOKIES['name']    
-    if 'mobile' in request.COOKIES:
-        mobile=request.COOKIES['mobile']
-    # if 'address' in request.COOKIES:
-    #     address=request.COOKIES['address']
-
-    # here we are placing number of orders as much there is a products
-    # suppose if we have 5 items in cart and we place order....so 5 rows will be created in orders table
-    # there will be lot of redundant data in orders table...but its become more complicated if we normalize it
-    # after order placed cookies should be deleted
-    response = render(request,'ecom/payment_success.html',{'product_count_in_cart':product_count_in_cart})
-    # response.delete_cookie('product_ids')
-    del request.session['cart']
-    # response.delete_cookie('email')
-    response.delete_cookie('name')
-    response.delete_cookie('mobile')
-    # response.delete_cookie('address')
-    return response
+        return HttpResponseForbidden()
 
 #---------------------------------------------------------------------------------
 #------------------------ ABOUT US AND CONTACT US VIEWS START --------------------

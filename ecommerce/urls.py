@@ -44,9 +44,14 @@ urlpatterns = [
 
     path('add-to-cart/<int:pk>', views.add_to_cart_view,name='add-to-cart'),
     path('cart', views.cart_view,name='cart'),
+
+    path('increment-quantity/<int:pk>/', views.increment_quantity_view, name='increment_quantity'),
+    path('decrement-quantity/<int:pk>/', views.decrement_quantity_view, name='decrement_quantity'),
+
     path('remove-from-cart/<int:pk>', views.remove_from_cart_view,name='remove-from-cart'),
     path('customer-address', views.customer_address_view,name='customer-address'),
     path('payment-success', views.payment_success_view,name='payment-success'),
+    path('webhook', views.webhook_view,name='webhook'),
 
 
 ]

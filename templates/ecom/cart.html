@@ -59,6 +59,10 @@
   color: white;
 }
 
+  tr, th, td {
+    text-align: center;
+  }
+
 </style>
 
 </head>
@@ -76,8 +80,8 @@
           <th>Image</th>
           <th>Price</th>
           <th>Description</th>
+          <th>Quantity</th>
           <th>Action</th>
-
         </tr>
       </thead>
       {% for p in products %}
@@ -87,8 +91,12 @@
         <td> <img src="{% static p.product_image.url %}" alt="Profile Pic" height="50px" width="50px" /></td>
         <td>₹ {{p.price}}</td>
         <td>{{p.description}}</td>
+        <td>
+          <a href="{% url 'increment_quantity' p.id %}"><button class="btn btn-primary btn-sm">+</button></a>
+          <span id="quantity_{{ p.id }}">{{ p.quantity }}</span>
+          <a href="{% url 'decrement_quantity' p.id %}"><button class="btn btn-danger btn-sm">-</button></a>
+      </td>
         <td><a class="btn btn-danger" href="{% url 'remove-from-cart' p.id  %}"><span class="glyphicon glyphicon-trash"></span></a></td>
-        <!-- <td>print("{{p.id}}")<td>  -->
       </tr>
       {%else%}
       <br><br><br>
@@ -103,7 +111,5 @@
   <button class="btn btn-danger btn-lg">Total ₹{{total}}</button>
   <a href="/customer-address"><button class="btn btn-success btn-lg" ><span>Purchase </span></button></a>
 </div>
-
-
 <br><br><br><br><br>
 {% endblock content %}
