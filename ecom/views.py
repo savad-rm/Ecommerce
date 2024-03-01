@@ -382,11 +382,13 @@ def customer_address_view(request):
     return render(request,'ecom/customer_address.html',{'addressForm':addressForm,'product_in_cart':product_in_cart,'product_count_in_cart':product_count_in_cart})
 
 SECRET_KEY="s3ZK5qrR1Vyl9LPldjAm3Kru"
-payload=None
-signature=None
+# payload=None
+# signature=None
+flag=False
 
 def webhook_view(request):
-    global payload, signature
+    global flag
+    # global payload, signature
     if request.method == 'POST':
         payload = request.body
         signature = request.headers.get('X-Razorpay-Signature')
@@ -394,7 +396,7 @@ def webhook_view(request):
         # Verify webhook signature
         if not verify_webhook_signature(payload, signature):
             return HttpResponseForbidden()
-
+        flag=True
         # Process webhook event
         event = request.headers.get('X-Razorpay-Event')
         if event == 'payment.captured':
@@ -421,8 +423,10 @@ def verify_webhook_signature(payload, signature):
 # here we are just directing to this view...actually we have to check whther payment is successful or not
 #then only this view should be accessed
 def payment_success_view(request):
-    global payload, signature
-    if verify_webhook_signature(payload, signature):    
+    # global payload, signature
+    global flag
+    # if verify_webhook_signature(payload, signature): 
+    if flag==True:
         # Here we will place order | after successful payment
         # we will fetch customer  mobile, address, Email
         # we will fetch product id from cookies then respective details from db
