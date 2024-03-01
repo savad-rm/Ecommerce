@@ -16,6 +16,7 @@ import json
 from django.http import JsonResponse, HttpResponseForbidden, HttpResponseNotAllowed
 import hmac
 import hashlib
+from django.views.decorators.csrf import csrf_exempt
 
 
 
@@ -386,6 +387,7 @@ SECRET_KEY="s3ZK5qrR1Vyl9LPldjAm3Kru"
 # signature=None
 flag=False
 
+@csrf_exempt
 def webhook_view(request):
     global flag
     # global payload, signature
