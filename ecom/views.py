@@ -361,8 +361,15 @@ def customer_address_view(request):
             cart = request.session.get('cart', {})
             cart_items = list(cart.values())  
             total = sum(float(item['price']) * item['quantity'] for item in cart_items)
+
+            razorpay_api_key = settings.RAZORPAY_API_KEY
+            razorpay_api_secret = settings.RAZORPAY_API_SECRET
+
+            print(razorpay_api_key)
+            print(razorpay_api_secret)
             
-            client = razorpay.Client(auth=("rzp_test_7kPo1SLPf8JLM2", "s3ZK5qrR1Vyl9LPldjAm3Kru"))
+            # client = razorpay.Client(auth=("rzp_test_7kPo1SLPf8JLM2", "s3ZK5qrR1Vyl9LPldjAm3Kru"))
+            client = razorpay.Client(auth=(razorpay_api_key, razorpay_api_secret))
             payment=client.order.create({
             "amount": total*100,
             "currency": "INR",
@@ -382,7 +389,7 @@ def customer_address_view(request):
             return response
     return render(request,'ecom/customer_address.html',{'addressForm':addressForm,'product_in_cart':product_in_cart,'product_count_in_cart':product_count_in_cart})
 
-SECRET_KEY="s3ZK5qrR1Vyl9LPldjAm3Kru"
+
 # payload=None
 # signature=None
 flag=False
@@ -398,10 +405,11 @@ def webhook_view(request):
         # Verify webhook signature
         if not verify_webhook_signature(payload, signature):
             return HttpResponseForbidden()
-        flag=True
         # Process webhook event
         event = request.headers.get('X-Razorpay-Event')
         if event == 'payment.captured':
+            flag=True
+            print('Payment captured')
             # Handle payment success
             # Update order status, send confirmation email, etc.
             return JsonResponse({'status': 'success'})
@@ -415,9 +423,11 @@ def webhook_view(request):
 
     return HttpResponseNotAllowed(['POST'])
 
+# SECRET_KEY="s3ZK5qrR1Vyl9LPldjAm3Kru"
 
 def verify_webhook_signature(payload, signature):
-    expected_signature = hmac.new(SECRET_KEY.encode(), payload, hashlib.sha256).hexdigest()
+    razorpay_api_secret = settings.RAZORPAY_API_SECRET
+    expected_signature = hmac.new(razorpay_api_secret.encode(), payload, hashlib.sha256).hexdigest()
     return hmac.compare_digest(signature, expected_signature)
 
 
