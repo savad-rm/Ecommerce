@@ -12,6 +12,7 @@ urlpatterns = [
     # path('logout', views.logout_view,name='logout'),
     path('aboutus', views.aboutus_view),
     path('contactus', views.contactus_view,name='contactus'),
+    path('privacy-policy', views.privacy_and_policy_view,name='privacy-policy'),
     path('send-feedback', views.send_feedback_view,name='send-feedback'),
     path('view-feedback', views.view_feedback_view,name='view-feedback'),
 
@@ -54,4 +55,4 @@ urlpatterns = [
     path('webhook', views.webhook_view,name='webhook'),
 
 
-]
+] 

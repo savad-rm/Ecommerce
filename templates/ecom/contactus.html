@@ -1,39 +1,52 @@
-<!DOCTYPE html>
-{% load static %}
-<html lang="en" dir="ltr">
-
+{% extends 'ecom/homebase.html' %} {% load static %} {% block content %}
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, shrink-to-fit=no"
+  />
   <title>Vending Machine</title>
-
-
+  <style>
+    .content-container {
+    display: grid;
+    place-items: center;
+    height: calc(88.3vh - 175px); /* Adjust the height as needed */
+    /* Other styles */
+    .contact-info {
+      font-size: 18px;
+      color: #333;
+    }
+    .contact-info a {
+      color: #007bff;
+      text-decoration: none;
+    }
+  }
+  </style>
 </head>
 
-<body style="background-color: #B3E5FC;">
-
-  {%if request.user.is_authenticated%}
-    {% include "ecom/customer_navbar.html" %}
-  {%else%}
-    {% include "ecom/navbar.html" %}
-  {%endif%}
-
-  <center>
-    <h3 class='alert alert-success'>Send Us Your Valuable Feedback !</h3>
-
-    <form method="POST">
-      <!-- Very Important csrf Token -->
-      {% csrf_token %}
-      <div class="form-group">
-        <p>
-        <h3>{{ form.as_p }}</h3>
-        </p>
+<body style="background-color: #f7f7f7;">
+  <div class="content-container">
+    <div class="contact-info">
+      <h2 style="font-size: 34px; color: #333; text-align: center;">Contact Us</h2>
+      <p style="margin-bottom: 20px;">
+        We value your feedback and inquiries.
+         Feel free to reach out to us for any questions or concerns regarding our vending machine services. 
+         Our dedicated team is here to assist you.
+      </p>
+      <p>
+        For general inquiries, please email us at <a href="mailto:vndmch404@gmail.com">vndmch404@gmail.com</a> or call us at <a href="tel:+919072242643">+91 9072242643</a>.
+      </p>
+      <p>
+        For partnership opportunities or business inquiries, please contact our sales team at <a href="mailto:vndmch404@gmail.com">vndmch404@gmail.com</a>.
+      </p>
+      <p>
+        Visit us at our headquarters:
         <br>
-        <input type="submit" value="Send Message" class='btn btn-primary btn-lg'>
-      </div>
-    </form>
-  </center>
-  {% include "ecom/footer.html" %}
-</body>
+        123 Vending Machine Street,
+        <br>
+        Cityville, State, Zip Code
+      </p>
+    </div>
 
-</html>
+</div>
+</body>
+{% endblock %}

@@ -1,28 +1,42 @@
-<!DOCTYPE html>
+
+{% extends "ecom/homebase.html" %}
 {% load static %}
-<html lang="en" dir="ltr">
+{% block content %}
+
 
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <title>Vending Machine</title>
-  <style media="screen">
-    .footer{
-      position: fixed;
+  <style>
+    .content-container {
+    display: grid;
+    place-items: center;
+    height: calc(88.3vh - 175px); /* Adjust the height as needed */
+    /* Other styles */
+  }
+  .message {
+      text-align: center;
+      font-size: 24px;
+      line-height: 1.5;
+      color: #333; /* Set text color */
     }
   </style>
 </head>
-
 <body style="background-color:#f7f7f7;">
-  {%if request.user.is_authenticated%}
-    {% include "ecom/customer_navbar.html" %}
-  {%else%}
-    {% include "ecom/navbar.html" %}
-  {%endif%}
-  <br><br><br>
-<h3 style="text-align:center;">"Indulge in instant satisfaction – Your cravings, met at the touch of a button with our vending machine delights!"</h3>
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-  {% include "ecom/footer.html" %}
-</body>
 
-</html>
+  <div class="content-container">
+    <div class="message">
+      Welcome to our Vending Machine website! We provide an extensive range of snacks, beverages, and other goodies to satisfy your cravings instantly. Whether you're at work, school, or on the go, our vending machines are conveniently located for your convenience.
+    </p>
+    <p>
+      Our mission is to deliver delicious and high-quality products while ensuring a seamless and enjoyable experience for our customers. With just the touch of a button, you can indulge in your favorite snacks and drinks anytime, anywhere.
+    </p>
+    <p>
+      Browse through our selection of snacks and beverages, and discover new flavors and treats to tantalize your taste buds. We're committed to providing exceptional service and ensuring that every visit to our vending machines is a delightful one.
+    </p>
+    </div>
+</div>
+ 
+</body>
+{% endblock %}

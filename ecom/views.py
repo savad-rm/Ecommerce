@@ -314,7 +314,6 @@ def send_feedback_view(request):
             return render(request, 'ecom/feedback_sent.html')
     return render(request, 'ecom/send_feedback.html', {'feedbackForm':feedbackForm})
 
-
 #---------------------------------------------------------------------------------
 #------------------------ CUSTOMER RELATED VIEWS START ------------------------------
 #---------------------------------------------------------------------------------
@@ -365,8 +364,8 @@ def customer_address_view(request):
             razorpay_api_key = settings.RAZORPAY_API_KEY
             razorpay_api_secret = settings.RAZORPAY_API_SECRET
 
-            print(razorpay_api_key)
-            print(razorpay_api_secret)
+            # print(razorpay_api_key)
+            # print(razorpay_api_secret)
             
             # client = razorpay.Client(auth=("rzp_test_7kPo1SLPf8JLM2", "s3ZK5qrR1Vyl9LPldjAm3Kru"))
             client = razorpay.Client(auth=(razorpay_api_key, razorpay_api_secret))
@@ -429,8 +428,6 @@ def verify_webhook_signature(payload, signature):
     razorpay_api_secret = settings.RAZORPAY_API_SECRET
     expected_signature = hmac.new(razorpay_api_secret.encode(), payload, hashlib.sha256).hexdigest()
     return hmac.compare_digest(signature, expected_signature)
-
-
 
 # here we are just directing to this view...actually we have to check whther payment is successful or not
 #then only this view should be accessed
@@ -509,10 +506,31 @@ def payment_success_view(request):
 #---------------------------------------------------------------------------------
 #------------------------ ABOUT US AND CONTACT US VIEWS START --------------------
 #---------------------------------------------------------------------------------
+def privacy_and_policy_view(request):
+    cart = request.session.get('cart', {})
+    cart_items = list(cart.values())
+    if cart_items:
+        product_count_in_cart = len(cart_items)
+    else:
+        product_count_in_cart=0   
+    return render(request,'ecom/privacy.html',{'product_count_in_cart':product_count_in_cart})
+
 def aboutus_view(request):
-    return render(request,'ecom/aboutus.html')
+    cart = request.session.get('cart', {})
+    cart_items = list(cart.values())
+    if cart_items:
+        product_count_in_cart = len(cart_items)
+    else:
+        product_count_in_cart=0
+    return render(request,'ecom/aboutus.html',{'product_count_in_cart':product_count_in_cart})
 
 def contactus_view(request):
+    cart = request.session.get('cart', {})
+    cart_items = list(cart.values())
+    if cart_items:
+        product_count_in_cart = len(cart_items)
+    else:
+        product_count_in_cart=0
     sub = forms.ContactusForm()
     if request.method == 'POST':
         sub = forms.ContactusForm(request.POST)
@@ -522,4 +540,4 @@ def contactus_view(request):
             message = sub.cleaned_data['Message']
             send_mail(str(name)+' || '+str(email),message, settings.EMAIL_HOST_USER, settings.EMAIL_RECEIVING_USER, fail_silently = False)
             return render(request, 'ecom/contactussuccess.html')
-    return render(request, 'ecom/contactus.html', {'form':sub})
+    return render(request, 'ecom/contactus.html', {'form':sub,'product_count_in_cart':product_count_in_cart})
