@@ -129,7 +129,7 @@ STATIC_URL = '/static/'
 
 STATICFILES_DIRS=[STATIC_DIR,]
 
-MEDIA_ROOT=os.path.join(BASE_DIR,'static')
+MEDIA_ROOT=os.path.join(BASE_DIR,'static/product_image')
 
 
 RAZORPAY_API_KEY = "rzp_test_7kPo1SLPf8JLM2"
